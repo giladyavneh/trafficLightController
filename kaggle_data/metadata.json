@@ -1,0 +1,8 @@
+{
+    "image_types": ["aguanambi", "ant_sales", "duque_de_caxias", "screenshot_", "image"],
+    "aguanambi": {"points": [[308, 168], [408, 1], [455, 1], [416, 155]]},
+    "ant_sales": {"points": [[429, 279], [125, 143], [216, 1], [494, 1]]},
+    "duque_de_caxias": {"points": [[343, 233], [115, 263], [42, 2], [186, 2]]},
+    "screenshot_": {},
+    "image": {}
+}
