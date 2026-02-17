@@ -53,11 +53,10 @@ class Intersection:
     def __init__(
         self,
         lanes: List[Lane],
-        traffic_indicators: List[TrafficIndecator],
         traffic_light_logic: Callable[[List[int], object], int]
     ):
         self.lanes = lanes
-        self.traffic_indicators = traffic_indicators
+        self.traffic_indicators = [TrafficIndecator(green_light_release_range=(8, 12)) for _ in lanes]
         self._logic_func = traffic_light_logic
         self._light_state = TrafficLightState()
         self.green_light_index = 0
@@ -75,23 +74,25 @@ class Intersection:
 
 if __name__ == "__main__":
     lanes = [Lane(200, (1, 8), 0.6) for _ in range(4)]
-    indicators = [TrafficIndecator(green_light_release_range = (8, 12)) for _ in range(4)]
 
-    intersection = Intersection(lanes, indicators, round_robin_logic)
+    intersection = Intersection(lanes, round_robin_logic)
     photo_picker = photo_picker_factory("./kaggle_data/test")
     visualizer = Visualizer()
 
     while any(lane.cars > 0 for lane in intersection.lanes) or \
           any(ind.current_cars > 0 for ind in intersection.traffic_indicators):
-        
+
         current_photos = photo_picker.update_images([ind.current_cars for ind in intersection.traffic_indicators])
+
         visualizer.display(
             current_photos,
             cars_in_intersection = [indicator.current_cars for indicator in intersection.traffic_indicators],
             cars_remaining = [lane.cars for lane in intersection.lanes],
             green_light_idx = intersection.green_light_index
         )
+
         current_counts = visual_recognition(current_photos)
+    
         intersection.update(current_counts)
         
         # Adding a print to see progress since display is empty
