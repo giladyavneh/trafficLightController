@@ -10,13 +10,14 @@ def visual_recognition(current_photos: List[Any]) -> List[int]:
     if not current_photos:
         return []
 
-    results = model(current_photos, verbose=False, conf=0.4)
     counts = []
-    for result in results:
+    for photo in current_photos:
+        results = model(photo, verbose=False, conf=0.4)
         count = 0
-        for box in result.boxes:
-            if int(box.cls[0]) in VALID_CLASSES:
-                count += 1
+        for result in results:
+            for box in result.boxes:
+                if int(box.cls[0]) in VALID_CLASSES:
+                    count += 1
         counts.append(count)
-        
+
     return counts
