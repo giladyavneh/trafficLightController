@@ -1,23 +1,24 @@
 from typing import List, Any
 from ultralytics import RTDETR
+from ultralytics import YOLO
+import torch
 
-model = RTDETR('rtdetr-l.pt')
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+model = RTDETR('rtdetr-l.pt') if device == 'cuda' else YOLO('yolov8n.pt')
 
-# 1: bicycle, 2: car, 3: motorcycle, 5: bus
-VALID_CLASSES = {1, 2, 3, 5}
+VALID_CLASSES_LIST = [1, 2, 3, 5]
 
+@torch.inference_mode()
 def visual_recognition(current_photos: List[Any]) -> List[int]:
     if not current_photos:
         return []
 
-    counts = []
-    for photo in current_photos:
-        results = model(photo, verbose=False, conf=0.4)
-        count = 0
-        for result in results:
-            for box in result.boxes:
-                if int(box.cls[0]) in VALID_CLASSES:
-                    count += 1
-        counts.append(count)
+    results = model(current_photos, 
+                    verbose=False, 
+                    conf=0.4, 
+                    classes=VALID_CLASSES_LIST,
+                    half=(device == 'cuda'))
+
+    counts = [len(result.boxes) for result in results]
 
     return counts
