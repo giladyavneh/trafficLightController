@@ -3,22 +3,11 @@ import time
 import torch
 from concurrent.futures import ProcessPoolExecutor
 from infra.simulation_runner import run_simulation, SimulationArgs
-from infra.logic_functions import round_robin_logic
 
 torch.set_num_threads(max(1, os.cpu_count() // 2))
 torch.set_num_interop_threads(1)
 
-scenarios = [
-    ("Low Traffic", (1, 7), 0.5),
-    ("Medium Traffic", (2, 9), 0.6),
-    ("High Traffic", (3, 11), 0.7),
-]
-
-logic_functions = [
-    ("Round Robin", round_robin_logic),
-]
-
-def main():
+def main(scenarios, logic_functions):
     t1 = time.perf_counter()
 
     tasks = [

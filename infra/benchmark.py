@@ -1,4 +1,14 @@
 import torch
+from infra.logic_functions import round_robin_logic
+scenarios = [
+    ("Low Traffic", (1, 7), 0.5),
+    ("Medium Traffic", (2, 9), 0.6),
+    ("High Traffic", (3, 11), 0.7),
+]
+
+logic_functions = [
+    ("Round Robin", round_robin_logic),
+]
 
 if torch.cuda.is_available():
     print("CUDA detected → Running GPU benchmark\n")
@@ -8,4 +18,4 @@ else:
     from infra.benchmark_cpu import main
 
 if __name__ == "__main__":
-    main()
+    main(scenarios, logic_functions)

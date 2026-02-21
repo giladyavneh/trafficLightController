@@ -12,7 +12,7 @@ class SimulationArgs(NamedTuple):
     logic_name: str
     traffic_light_logic: Callable[[List[int], object], int]
 
-def run_simulation(args: SimulationArgs):
+def run_simulation(args: SimulationArgs, light=True):
     scenario_name, traffic_rate_range, odds_of_traffic, logic_name, traffic_light_logic = args
 
     lanes = [Lane(CARS_FOR_LANE, traffic_rate_range, odds_of_traffic) for _ in range(4)]
@@ -28,7 +28,8 @@ def run_simulation(args: SimulationArgs):
             [ind.current_cars for ind in intersection.traffic_indicators]
         )
 
-        current_counts = visual_recognition(current_photos)
+        detection_results = visual_recognition(current_photos, light=light)
+        current_counts = [det['count'] for det in detection_results]
         intersection.update(current_counts)
         tick += 1
 

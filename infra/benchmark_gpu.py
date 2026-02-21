@@ -1,18 +1,7 @@
 import time
 from simulation_runner import run_simulation, SimulationArgs
-from infra.logic_functions import round_robin_logic
 
-scenarios = [
-    ("Low Traffic", (1, 7), 0.5),
-    ("Medium Traffic", (2, 9), 0.6),
-    ("High Traffic", (3, 11), 0.7),
-]
-
-logic_functions = [
-    ("Round Robin", round_robin_logic),
-]
-
-def main():
+def main(scenarios, logic_functions):
     t1 = time.perf_counter()
 
     tasks = [
