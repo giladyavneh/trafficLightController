@@ -20,7 +20,7 @@ class Visualizer:
         self.fig = plt.figure(figsize=(10, 10))
         self.fig.patch.set_facecolor('#121212') # Dark dashboard theme
 
-    def display(self, images, cars_in_intersection: list[int], cars_remaining: list[int], green_light_idx: int, detections=None, photo_paths=None, recognized_counts=None):
+    def display(self, images, cars_in_intersection: list[int], cars_remaining: list[int], green_light_idx: int, detections=None):
         if not plt.fignum_exists(self.fig.number):
             return
 
@@ -29,8 +29,10 @@ class Visualizer:
         for i in range(len(cars_in_intersection)):
             at_light_count = cars_in_intersection[i]
             reservoir_count = cars_remaining[i]
+            
             rect = self.img_rects[i]
             ax = self.fig.add_axes(rect)
+            
             img = images[i]
             if img is not None:
                 ax.imshow(img, aspect='equal')
@@ -45,28 +47,16 @@ class Visualizer:
                         # Draw rectangle
                         rect_patch = plt.Rectangle((x1, y1), width, height, linewidth=2, edgecolor='yellow', facecolor='none', zorder=20)
                         ax.add_patch(rect_patch)
-            # Compose debug info
-            import os
-            fname = os.path.basename(photo_paths[i]) if photo_paths and i < len(photo_paths) and photo_paths[i] else ""
-            # Use the count from photo_picker.current_state if available
-            vehicles_in_photo = None
-            if photo_paths and i < len(photo_paths) and photo_paths[i] and hasattr(self, 'photo_picker_state') and self.photo_picker_state:
-                # Try to match the photo path to the state
-                for state in self.photo_picker_state:
-                    if state and 'path' in state and state['path'] == photo_paths[i]:
-                        vehicles_in_photo = state.get('count', '?')
-                        break
-            if vehicles_in_photo is None:
-                vehicles_in_photo = at_light_count
-            vehicles_recognized = recognized_counts[i] if recognized_counts and i < len(recognized_counts) else "?"
-            debug_title = f"{fname}\nvehicles in photo: {vehicles_in_photo}\nvehicles recognized: {vehicles_recognized}"
+
+            
             # Traffic Light
             light_color = 'lime' if green_light_idx == i else 'red'
             circle = plt.Circle((0.1, 0.9), 0.07, color=light_color, 
                                 transform=ax.transAxes, zorder=10)
             ax.add_patch(circle)
-            # Show all info at top
-            ax.set_title(debug_title, color='yellow', fontsize=9, weight='bold', pad=10)
+            
+            ax.set_title(f"{self.labels[i]}\nRes: {reservoir_count}", 
+                         color='white', fontsize=10, weight='bold', pad=8)
             ax.axis('off')
 
             dots_to_draw = min(at_light_count, 144)
