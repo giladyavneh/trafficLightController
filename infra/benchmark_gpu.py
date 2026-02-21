@@ -1,28 +1,7 @@
 import time
 from simulation_runner import run_simulation, SimulationArgs
-from infra.logic_functions import (
-    round_robin_logic,
-    most_cars_logic,
-    adaptive_timer_logic,
-    starvation_aware_logic,
-    proportional_share_logic,
-)
 
-scenarios = [
-    ("Low Traffic", (1, 7), 0.5),
-    ("Medium Traffic", (2, 9), 0.6),
-    ("High Traffic", (3, 11), 0.7),
-]
-
-logic_functions = [
-    ("Round Robin", round_robin_logic),
-    ("Most Cars", most_cars_logic),
-    ("Adaptive Timer", adaptive_timer_logic),
-    ("Starve-Aware", starvation_aware_logic),
-    ("Proportional", proportional_share_logic),
-]
-
-def main():
+def main(scenarios, logic_functions):
     t1 = time.perf_counter()
 
     tasks = [
@@ -39,11 +18,11 @@ def main():
 
 def print_results(results):
     print("\n" + "="*50)
-    print(f"{'Scenario':<20} | {'Logic':<20} | {'Ticks':<10}")
-    print("-" * 55)
+    print(f"{'Scenario':<20} | {'Logic':<15} | {'Time':<10}")
+    print("-" * 50)
     for r in results:
-        print(f"{r[0]:<20} | {r[1]:<20} | {r[2]:<10}")
-    print("="*55)
+        print(f"{r[0]:<20} | {r[1]:<15} | {r[2]:<10}")
+    print("="*50)
 
 if __name__ == "__main__":
     main()

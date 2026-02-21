@@ -20,7 +20,7 @@ class Visualizer:
         self.fig = plt.figure(figsize=(10, 10))
         self.fig.patch.set_facecolor('#121212') # Dark dashboard theme
 
-    def display(self, images, cars_in_intersection: list[int], cars_remaining: list[int], green_light_idx: int):
+    def display(self, images, cars_in_intersection: list[int], cars_remaining: list[int], green_light_idx: int, detections=None):
         if not plt.fignum_exists(self.fig.number):
             return
 
@@ -36,6 +36,18 @@ class Visualizer:
             img = images[i]
             if img is not None:
                 ax.imshow(img, aspect='equal')
+                # Draw bounding boxes if detections are provided
+                if detections is not None and i < len(detections):
+                    det = detections[i]
+                    boxes = det.get('boxes', [])
+                    for j, box in enumerate(boxes):
+                        x1, y1, x2, y2 = box
+                        width = x2 - x1
+                        height = y2 - y1
+                        # Draw rectangle
+                        rect_patch = plt.Rectangle((x1, y1), width, height, linewidth=2, edgecolor='yellow', facecolor='none', zorder=20)
+                        ax.add_patch(rect_patch)
+
             
             # Traffic Light
             light_color = 'lime' if green_light_idx == i else 'red'

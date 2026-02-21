@@ -28,7 +28,8 @@ def run_simulation(args: SimulationArgs):
             [ind.current_cars for ind in intersection.traffic_indicators]
         )
 
-        current_counts = visual_recognition(current_photos)
+        detection_results = visual_recognition(current_photos)
+        current_counts = [det['count'] for det in detection_results]
         intersection.update(current_counts)
         tick += 1
 
