@@ -3,7 +3,13 @@ import time
 import torch
 from concurrent.futures import ProcessPoolExecutor
 from infra.simulation_runner import run_simulation, SimulationArgs
-from infra.logic_functions import round_robin_logic
+from infra.logic_functions import (
+    round_robin_logic,
+    most_cars_logic,
+    adaptive_timer_logic,
+    starvation_aware_logic,
+    proportional_share_logic,
+)
 
 torch.set_num_threads(max(1, os.cpu_count() // 2))
 torch.set_num_interop_threads(1)
@@ -15,7 +21,7 @@ scenarios = [
 ]
 
 logic_functions = [
-    ("Round Robin", round_robin_logic),
+    ("Most Cars", round_robin_logic),
 ]
 
 def main():
@@ -36,11 +42,11 @@ def main():
 
 def print_results(results):
     print("\n" + "="*50)
-    print(f"{'Scenario':<20} | {'Logic':<15} | {'Time':<10}")
-    print("-" * 50)
+    print(f"{'Scenario':<20} | {'Logic':<20} | {'Ticks':<10}")
+    print("-" * 55)
     for r in results:
-        print(f"{r[0]:<20} | {r[1]:<15} | {r[2]:<10}")
-    print("="*50)
+        print(f"{r[0]:<20} | {r[1]:<20} | {r[2]:<10}")
+    print("="*55)
 
 if __name__ == "__main__":
     main()
