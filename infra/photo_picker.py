@@ -23,6 +23,7 @@ class PhotoPicker:
                     self.current_state[i] = {
                         "img": cv2.cvtColor(new_img, cv2.COLOR_BGR2RGB),
                         "count": cars_in_lane,
+                        "true_count": best_key,
                         "path": path # The recognition component might need the raw path
                     }
         return [state["img"] for state in self.current_state]
