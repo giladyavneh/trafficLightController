@@ -1,28 +1,6 @@
 from matplotlib import pyplot as plt
 
 class Visualizer:
-    def setup_bad_file_collector(self):
-        self.bad_files = []
-        self._key_direction_map = {
-            'up': 0,    # North
-            'right': 1, # East
-            'down': 2,  # South
-            'left': 3   # West
-        }
-        self._last_photo_paths = None
-        self.fig.canvas.mpl_connect('key_press_event', self._on_key_press)
-
-    def _on_key_press(self, event):
-        if not hasattr(self, '_key_direction_map') or self._last_photo_paths is None:
-            return
-        direction = self._key_direction_map.get(event.key)
-        if direction is not None:
-            print(f"{event.key.upper()} PRESSED")
-        if direction is not None and self._last_photo_paths and direction < len(self._last_photo_paths):
-            path = self._last_photo_paths[direction]
-            if path:
-                self.bad_files.append(path)
-                print(f"Added bad file: {path}")
     def __init__(self):
         # 's' = Photo size. 'm' = Margin from center cluster.
         s = 0.22  
@@ -43,8 +21,6 @@ class Visualizer:
         self.fig.patch.set_facecolor('#121212') # Dark dashboard theme
 
     def display(self, images, cars_in_intersection: list[int], cars_remaining: list[int], green_light_idx: int, detections=None, photo_paths=None, recognized_counts=None):
-        # Store the latest photo paths for key event handling
-        self._last_photo_paths = photo_paths
         if not plt.fignum_exists(self.fig.number):
             return
 
@@ -73,13 +49,15 @@ class Visualizer:
             import os
             fname = os.path.basename(photo_paths[i]) if photo_paths and i < len(photo_paths) and photo_paths[i] else ""
             # Use the count from photo_picker.current_state if available
-            vehicles_in_photo = "?"
+            vehicles_in_photo = None
             if photo_paths and i < len(photo_paths) and photo_paths[i] and hasattr(self, 'photo_picker_state') and self.photo_picker_state:
                 # Try to match the photo path to the state
                 for state in self.photo_picker_state:
                     if state and 'path' in state and state['path'] == photo_paths[i]:
-                        vehicles_in_photo = state.get('true_count', '?')
+                        vehicles_in_photo = state.get('count', '?')
                         break
+            if vehicles_in_photo is None:
+                vehicles_in_photo = at_light_count
             vehicles_recognized = recognized_counts[i] if recognized_counts and i < len(recognized_counts) else "?"
             debug_title = f"{fname}\nvehicles in photo: {vehicles_in_photo}\nvehicles recognized: {vehicles_recognized}"
             # Traffic Light
@@ -124,8 +102,3 @@ class Visualizer:
 
         plt.draw()
         plt.pause(0.1)
-
-    def print_bad_files(self):
-        print("\nBad files collected:")
-        for path in self.bad_files:
-            print(path)
