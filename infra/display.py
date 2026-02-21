@@ -13,12 +13,14 @@ while any(lane.cars > 0 for lane in intersection.lanes) or \
         any(ind.current_cars > 0 for ind in intersection.traffic_indicators):
 
     current_photos = photo_picker.update_images([ind.current_cars for ind in intersection.traffic_indicators])
+    detection_results = visual_recognition(current_photos)
     visualizer.display(
         current_photos, cars_in_intersection = [indicator.current_cars for indicator in intersection.traffic_indicators],
-        cars_remaining = [lane.cars for lane in intersection.lanes], green_light_idx = intersection.green_light_index
+        cars_remaining = [lane.cars for lane in intersection.lanes], green_light_idx = intersection.green_light_index,
+        detections = detection_results
     )
-    current_counts = visual_recognition(current_photos)
-    intersection.update([0,0,0,0])
+    current_counts = [det['count'] for det in detection_results]
+    intersection.update(current_counts)
     
     total_waiting = sum(ind.current_cars for ind in intersection.traffic_indicators)
     remaining_in_reservoir = sum(lane.cars for lane in intersection.lanes)    

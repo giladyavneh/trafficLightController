@@ -24,7 +24,7 @@ def create_photos_dict(images_dir, labels_dir):
                 for line in f:
                     # YOLO format: <class_id> <x_center> <y_center> <width> <height>
                     parts = line.split()
-                    if parts and parts[0] == '2':  # Class 2 is 'car' per your yaml
+                    if parts and int(parts[0]) in [1, 2]:  # 1 means bus, 2 means car
                         car_count += 1
         
         # 4. Store the path in our dictionary
