@@ -3,28 +3,21 @@ from ultralytics import RTDETR
 from ultralytics import YOLO
 import torch
 
-
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-target_names = ['car', 'bus']
+model = RTDETR('rtdetr-l.pt')
 
-def get_model_and_classes(light: bool):
-    if light:
-        model = YOLO('yolov8n.pt')
-    else:
-        model = RTDETR('rtdetr-l.pt')
-    valid_classes = [id for id, name in model.names.items() if name in target_names]
-    return model, valid_classes
+target_names = ['car', 'bus']
+VALID_CLASSES_LIST = [id for id, name in model.names.items() if name in target_names]
 
 @torch.inference_mode()
-def visual_recognition(current_photos: List[Any], light: bool = False) -> list:
+def visual_recognition(current_photos: List[Any]) -> List[int]:
     if not current_photos:
         return []
 
-    model, valid_classes = get_model_and_classes(light)
     results = model(current_photos, 
                     verbose=False, 
                     conf=0.4, 
-                    classes=valid_classes,
+                    classes=VALID_CLASSES_LIST,
                     half=(device == 'cuda'))
 
     output = []
