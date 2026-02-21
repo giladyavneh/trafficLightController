@@ -16,16 +16,45 @@ def round_robin_logic(counts: list[int], state: TrafficLightState):
 
     return state.current_green
 
+def max_logic(counts: list[int], state: TrafficLightState):
+        state.timer += 1
+
+        green_time = 5
+
+        if state.timer > green_time:
+            state.current_green = counts.index(max(counts))
+            state.timer = 0
+
+        return state.current_green
 
 def most_cars_logic(counts: list[int], state: TrafficLightState):
     """Always gives green to the lane with the most cars waiting.
 
     Keeps the current lane green for a minimum of 3 ticks to avoid
-    rapid switching that wastes the green-light release rate ramp-up.
+    rapid switching.  Forces a round-robin advance after MAX_GREEN
+    ticks so no single lane can hog the light forever.
     """
+    MIN_GREEN = 3
+    MAX_GREEN = 15
+
+    if not hasattr(state, 'round_robin_idx'):
+        state.round_robin_idx = 0
+
     state.timer += 1
 
-    if state.timer >= 3:
+    # Force switch via round-robin if we've held green too long
+    if state.timer >= MAX_GREEN:
+        n = len(counts)
+        for _ in range(n):
+            state.round_robin_idx = (state.round_robin_idx + 1) % n
+            if counts[state.round_robin_idx] > 0:
+                break
+        state.current_green = state.round_robin_idx
+        state.timer = 0
+        return state.current_green
+
+    # Skip minimum green time if the current lane is empty
+    if state.timer >= MIN_GREEN or counts[state.current_green] == 0:
         busiest = max(range(len(counts)), key=lambda i: counts[i])
         if busiest != state.current_green:
             state.current_green = busiest
@@ -48,16 +77,21 @@ def adaptive_timer_logic(counts: list[int], state: TrafficLightState):
 
     state.timer += 1
 
-    if state.timer >= state.phase_duration:
-        # Move to the next lane
-        state.current_green = (state.current_green + 1) % len(counts)
+    # Skip to next lane immediately if current lane is empty, or when phase expires
+    if state.timer >= state.phase_duration or counts[state.current_green] == 0:
+        # Advance round-robin, skipping empty lanes (but never loop forever)
+        n = len(counts)
+        for _ in range(n):
+            state.current_green = (state.current_green + 1) % n
+            if counts[state.current_green] > 0:
+                break
         state.timer = 0
 
         # Calculate how long the new lane should stay green
         total = sum(counts)
         if total > 0:
             ratio = counts[state.current_green] / total
-            state.phase_duration = max(MIN_GREEN, min(MAX_GREEN, round(ratio * MAX_GREEN * len(counts))))
+            state.phase_duration = max(MIN_GREEN, min(MAX_GREEN, round(ratio * MAX_GREEN * n)))
         else:
             state.phase_duration = MIN_GREEN
 
@@ -70,10 +104,12 @@ def starvation_aware_logic(counts: list[int], state: TrafficLightState):
     Tracks how long each lane has been waiting (red). If any lane has been
     red for more than `MAX_WAIT` ticks, it gets priority regardless of
     its car count. Otherwise the busiest lane wins, with a minimum green
-    phase of 3 ticks.
+    phase of 3 ticks.  A hard MAX_GREEN cap forces a round-robin advance
+    so no lane can hold the light indefinitely.
     """
     MAX_WAIT = 15
     MIN_GREEN = 3
+    MAX_GREEN = 18
 
     if not hasattr(state, 'wait_times'):
         state.wait_times = [0] * len(counts)
@@ -87,7 +123,18 @@ def starvation_aware_logic(counts: list[int], state: TrafficLightState):
         else:
             state.wait_times[i] += 1
 
-    if state.timer >= MIN_GREEN:
+    # Hard cap: force round-robin advance if held green too long
+    if state.timer >= MAX_GREEN:
+        n = len(counts)
+        for _ in range(n):
+            state.current_green = (state.current_green + 1) % n
+            if counts[state.current_green] > 0:
+                break
+        state.timer = 0
+        return state.current_green
+
+    # Skip minimum green time if the current lane is empty
+    if state.timer >= MIN_GREEN or counts[state.current_green] == 0:
         # Check for starving lanes first
         starving = [i for i in range(len(counts))
                     if state.wait_times[i] >= MAX_WAIT and counts[i] > 0]
@@ -111,8 +158,8 @@ def proportional_share_logic(counts: list[int], state: TrafficLightState):
 
     Works in cycles: at the start of each cycle it looks at current counts
     and assigns each lane a number of ticks proportional to its traffic.
-    Then it runs through the schedule, giving each non-empty lane its
-    allotted time before starting a new cycle.
+    Every lane is always included in the schedule (even empty ones get
+    MIN_GREEN ticks) so no lane is ever completely skipped.
     """
     MIN_GREEN = 2
     CYCLE_BUDGET = 20
@@ -131,19 +178,15 @@ def proportional_share_logic(counts: list[int], state: TrafficLightState):
             state.timer = 0
             state.current_green = state.schedule[state.schedule_idx][0]
         else:
-            # Build a new schedule based on current counts
+            # Build a new schedule — include ALL lanes so none get skipped
             total = sum(counts)
-            if total == 0:
-                state.schedule = [(state.current_green, MIN_GREEN)]
-            else:
-                state.schedule = []
-                for i in range(len(counts)):
-                    if counts[i] > 0:
-                        ticks = max(MIN_GREEN, round((counts[i] / total) * CYCLE_BUDGET))
-                        state.schedule.append((i, ticks))
-
-                if not state.schedule:
-                    state.schedule = [(state.current_green, MIN_GREEN)]
+            state.schedule = []
+            for i in range(len(counts)):
+                if total > 0 and counts[i] > 0:
+                    ticks = max(MIN_GREEN, round((counts[i] / total) * CYCLE_BUDGET))
+                else:
+                    ticks = MIN_GREEN
+                state.schedule.append((i, ticks))
 
             state.schedule_idx = 0
             state.timer = 0

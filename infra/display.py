@@ -1,11 +1,11 @@
 from infra.infra import Lane, Intersection
-from infra.logic_functions import round_robin_logic, most_cars_logic, starvation_aware_logic
+from infra.logic_functions import round_robin_logic, most_cars_logic, starvation_aware_logic, max_logic
 from infra.photo_picker import photo_picker_factory
 from infra.visualizer import Visualizer
 from infra.visual_recognition import visual_recognition
 
 lanes = [Lane(200, (1, 8), 0.6) for _ in range(4)]
-intersection = Intersection(lanes, most_cars_logic)
+intersection = Intersection(lanes, max_logic)
 photo_picker = photo_picker_factory("./kaggle_data/test")
 visualizer = Visualizer()
 
