@@ -4,7 +4,7 @@ from ultralytics import YOLO
 import torch
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-model = RTDETR('rtdetr-l.pt') if device == 'cuda' else YOLO('yolov8n.pt')
+model = RTDETR('rtdetr-l.pt')
 
 target_names = ['car', 'bus']
 VALID_CLASSES_LIST = [id for id, name in model.names.items() if name in target_names]
