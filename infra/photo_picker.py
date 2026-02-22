@@ -12,10 +12,10 @@ class PhotoPicker:
     def update_images(self, cars_in_intersection: list[int]):
         """Syncs the photos with the current car counts in the intersection."""
         for i, cars_in_lane in enumerate(cars_in_intersection):
-            # Only update if the count changed or we have no image
+            # only update if the count changed or we have no image
             if cars_in_lane != self.current_state[i]["count"] or self.current_state[i]["img"] is None:
                 available = sorted(self.photos_dict.keys())
-                # Find closest match in the dataset
+                # closest match in the dataset
                 best_key = min(available, key=lambda x: abs(x - cars_in_lane))
                 path = random.choice(self.photos_dict[best_key])
                 new_img = cv2.imread(path)
@@ -23,7 +23,7 @@ class PhotoPicker:
                     self.current_state[i] = {
                         "img": cv2.cvtColor(new_img, cv2.COLOR_BGR2RGB),
                         "count": cars_in_lane,
-                        "path": path # The recognition component might need the raw path
+                        "path": path
                     }
         return [state["img"] for state in self.current_state]
     

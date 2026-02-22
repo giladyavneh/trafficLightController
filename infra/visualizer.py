@@ -7,18 +7,17 @@ class Visualizer:
         m = 0.08  
         
         self.img_rects = {
-        0: [0.5 - s/2, 0.5 + m,   s, s], # Index 0: North
-        1: [0.5 + m,   0.5 - s/2, s, s], # Index 1: East
-        2: [0.5 - s/2, 0.5 - m - s, s, s], # Index 2: South (Swapped with 3)
-        3: [0.5 - m - s, 0.5 - s/2, s, s]  # Index 3: West (Swapped with 2)
+        0: [0.5 - s/2, 0.5 + m,   s, s], # North
+        1: [0.5 + m,   0.5 - s/2, s, s], # East
+        2: [0.5 - s/2, 0.5 - m - s, s, s], # South
+        3: [0.5 - m - s, 0.5 - s/2, s, s]  # West
     }
     
-        # Update labels to match the index of your input arrays [N, E, S, W]
         self.labels = ["North", "East", "South", "West"]
         
         plt.ion()
         self.fig = plt.figure(figsize=(10, 10))
-        self.fig.patch.set_facecolor('#121212') # Dark dashboard theme
+        self.fig.patch.set_facecolor('#121212')
 
     def display(self, images, cars_in_intersection: list[int], cars_remaining: list[int], green_light_idx: int, detections=None):
         if not plt.fignum_exists(self.fig.number):
