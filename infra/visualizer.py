@@ -63,10 +63,9 @@ class Visualizer:
                 l, b, w, h = rect
                 q_width = 0.07 
                 gap = 0.005
-                
-                # Logic: [N:0, E:1, S:2, W:3]
-                # North (0) and West (3) -> Place queue on the LEFT
-                # East (1) and South (2) -> Place queue on the RIGHT
+
+                # North (0) and West (3) -> Place queue on the left
+                # East (1) and South (2) -> Place queue on the right
                 if i in [0, 3]: 
                     d_rect = [l - q_width - gap, b, q_width, h]
                 else:           
