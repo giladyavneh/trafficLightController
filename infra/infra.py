@@ -20,15 +20,15 @@ class TrafficIndecator:
     def update(self, light_is_green: bool, new_cars: int):
         self.current_cars += new_cars
         if light_is_green:
-            # Gradually increase release rate while green, up to the max range
+            # gradually increase release rate while green, up to the max range
             self.green_light_release_rate = min(self.green_light_release_range[1], 
                                                self.green_light_release_rate + random.randint(0, 1))
             
-            # Remove cars based on release rate, but don't go below zero
+            # remove cars based on release rate, but don't go below zero
             removed_cars = min(self.current_cars, self.green_light_release_rate)
             self.current_cars -= removed_cars
         else:
-            # Reset release rate when light turns red
+            # reset release rate when light turns red
             self.green_light_release_rate = self.green_light_release_range[0]
 
 class Lane:
@@ -94,12 +94,10 @@ if __name__ == "__main__":
         current_counts = visual_recognition(current_photos)
     
         intersection.update(current_counts)
-        
-        # Adding a print to see progress since display is empty
+
         total_waiting = sum(ind.current_cars for ind in intersection.traffic_indicators)
         remaining_in_reservoir = sum(lane.cars for lane in intersection.lanes)
         print(f"Waiting at Light: {total_waiting} | Remaining in Lanes: {remaining_in_reservoir}")
         
-        # Safety break for testing
         if remaining_in_reservoir == 0 and total_waiting == 0:
             break
