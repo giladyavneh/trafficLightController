@@ -1,5 +1,5 @@
 from infra.infra import Lane, Intersection
-from infra.logic_functions import round_robin_logic
+from infra.logic_functions import round_robin_logic, most_cars_logic_with_max_green_time, starvation_aware_logic, most_cars_logic_without_max_green_time
 from infra.photo_picker import photo_picker_factory
 from infra.visualizer import Visualizer
 from infra.visual_recognition import visual_recognition
