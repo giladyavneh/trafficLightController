@@ -1,5 +1,5 @@
 import torch
-from infra.logic_functions import round_robin_logic, most_cars_logic, starvation_aware_logic, max_logic
+from infra.logic_functions import round_robin_logic, most_cars_logic_with_max_green_time, starvation_aware_logic, most_cars_logic_without_max_green_time
 scenarios = [
     ("Low Traffic", (1, 7), 0.5),
     ("Medium Traffic", (2, 9), 0.6),
@@ -8,9 +8,9 @@ scenarios = [
 
 logic_functions = [
     ("Round Robin", round_robin_logic),
-    ("Most Cars", most_cars_logic),
+    ("Most Cars With Max Green Time", most_cars_logic_with_max_green_time),
     ("Starvation Aware", starvation_aware_logic),
-    ("Max Logic", max_logic)
+    ("Most Cars Without Max Green Time", most_cars_logic_without_max_green_time)
 ]
 
 if torch.cuda.is_available():

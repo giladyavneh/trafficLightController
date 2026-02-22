@@ -7,32 +7,63 @@ class TrafficLightState:
 
 
 def round_robin_logic(counts: list[int], state: TrafficLightState):
-    """Cycles through lanes every 6 ticks, ignoring car counts entirely."""
+    """Cycles through lanes every 6 ticks, ignoring car counts entirely.
+
+    Args:
+        counts: Number of cars waiting in each lane, ordered by compass
+            direction — North, East, South, West (indices 0–3).
+        state: Shared mutable state tracking the current green lane and timer.
+
+    Returns:
+        Index of the lane that should have the green light.
+    """
     state.timer += 1
 
+    # After 6 ticks, move to the next lane in order
     if state.timer > 5:
         state.current_green = (state.current_green + 1) % len(counts)
         state.timer = 0
 
     return state.current_green
 
-def max_logic(counts: list[int], state: TrafficLightState):
-        state.timer += 1
+def most_cars_logic_without_max_green_time(counts: list[int], state: TrafficLightState):
+    """Gives green to the lane with the most cars after a fixed interval.
 
-        green_time = 5
+    Switches every 5 ticks to whichever lane is busiest. Has no upper
+    bound on how long a lane can stay green if it keeps being the busiest.
 
-        if state.timer > green_time:
-            state.current_green = counts.index(max(counts))
-            state.timer = 0
+    Args:
+        counts: Number of cars waiting in each lane, ordered by compass
+            direction — North, East, South, West (indices 0–3).
+        state: Shared mutable state tracking the current green lane and timer.
 
-        return state.current_green
+    Returns:
+        Index of the lane that should have the green light.
+    """
+    state.timer += 1
+    green_time = 5
 
-def most_cars_logic(counts: list[int], state: TrafficLightState):
+    # Re-evaluate which lane is busiest every green_time ticks
+    if state.timer > green_time:
+        state.current_green = counts.index(max(counts))
+        state.timer = 0
+
+    return state.current_green
+
+def most_cars_logic_with_max_green_time(counts: list[int], state: TrafficLightState):
     """Always gives green to the lane with the most cars waiting.
 
     Keeps the current lane green for a minimum of 3 ticks to avoid
     rapid switching.  Forces a round-robin advance after MAX_GREEN
     ticks so no single lane can hog the light forever.
+
+    Args:
+        counts: Number of cars waiting in each lane, ordered by compass
+            direction — North, East, South, West (indices 0–3).
+        state: Shared mutable state tracking the current green lane and timer.
+
+    Returns:
+        Index of the lane that should have the green light.
     """
     MIN_GREEN = 3
     MAX_GREEN = 15
@@ -68,6 +99,14 @@ def adaptive_timer_logic(counts: list[int], state: TrafficLightState):
 
     Each lane gets a green phase whose length scales with the fraction of
     total traffic it holds.  Minimum phase is 3 ticks, maximum is 12.
+
+    Args:
+        counts: Number of cars waiting in each lane, ordered by compass
+            direction — North, East, South, West (indices 0–3).
+        state: Shared mutable state tracking the current green lane and timer.
+
+    Returns:
+        Index of the lane that should have the green light.
     """
     MIN_GREEN = 3
     MAX_GREEN = 12
@@ -106,6 +145,14 @@ def starvation_aware_logic(counts: list[int], state: TrafficLightState):
     its car count. Otherwise the busiest lane wins, with a minimum green
     phase of 3 ticks.  A hard MAX_GREEN cap forces a round-robin advance
     so no lane can hold the light indefinitely.
+
+    Args:
+        counts: Number of cars waiting in each lane, ordered by compass
+            direction — North, East, South, West (indices 0–3).
+        state: Shared mutable state tracking the current green lane and timer.
+
+    Returns:
+        Index of the lane that should have the green light.
     """
     MAX_WAIT = 15
     MIN_GREEN = 3
@@ -160,6 +207,14 @@ def proportional_share_logic(counts: list[int], state: TrafficLightState):
     and assigns each lane a number of ticks proportional to its traffic.
     Every lane is always included in the schedule (even empty ones get
     MIN_GREEN ticks) so no lane is ever completely skipped.
+
+    Args:
+        counts: Number of cars waiting in each lane, ordered by compass
+            direction — North, East, South, West (indices 0–3).
+        state: Shared mutable state tracking the current green lane and timer.
+
+    Returns:
+        Index of the lane that should have the green light.
     """
     MIN_GREEN = 2
     CYCLE_BUDGET = 20
